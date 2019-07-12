@@ -1,0 +1,34 @@
+{
+  "name": "ji-editor",
+  "version": "1.0.0",
+  "description": "> 对于复杂前端平台，实现一个可靠智能的前端编辑器是我们当前的瓶颈，该项目实现了一个基于monaco-editor的web编辑器\r #目的\r + 测试monaco-editor相关特性\r + 替换项目中已有的mirrorcode编辑器，实现intellisense\r #面向技术栈\r + webpack\r + Angular\r #关于monaco-editor\r + [monaco-editor官方API](https://microsoft.github.io/monaco-editor/api/index.html)\r + [monaco-editor repo](https://github.com/Microsoft/monaco-editor)",
+  "private": true,
+  "dependencies": {
+    "lodash": "^4.17.14",
+    "webpack": "^4.35.3",
+    "webpack-cli": "^3.3.5"
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^3.0.0",
+    "css-loader": "^3.0.0",
+    "file-loader": "^4.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "monaco-editor": "^0.17.1",
+    "style-loader": "^0.23.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jiiiin/Ji-Editor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jiiiin/Ji-Editor/issues"
+  },
+  "homepage": "https://github.com/Jiiiin/Ji-Editor#readme"
+}
