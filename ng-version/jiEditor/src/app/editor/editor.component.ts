@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
+declare const monaco;
 
 @Component({
   selector: 'app-editor',
@@ -12,7 +12,12 @@ export class EditorComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    this._initEditor();
+    const onGotAmdLoader = () => {
+      // Load monaco
+      (<any>window).require.config({paths : {'vs' : 'assets/monaco/vs'}});
+      (<any>window)
+          .require([ 'vs/editor/editor.main' ], () => { this._initEditor(); });
+    };
   }
 
   private _initEditor(): void {
