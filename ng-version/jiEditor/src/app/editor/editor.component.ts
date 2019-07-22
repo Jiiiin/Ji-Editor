@@ -14,7 +14,7 @@ export class EditorComponent implements OnInit {
   ngOnInit() {
     const onGotAmdLoader = () => {
       // Load monaco
-      (<any>window).require.config({paths : {'vs' : 'assets/monaco/vs'}});
+      (<any>window).require.config({paths : {'vs' : '/assets/monaco/vs'}});
       (<any>window)
           .require([ 'vs/editor/editor.main' ], () => { this._initEditor(); });
     };
