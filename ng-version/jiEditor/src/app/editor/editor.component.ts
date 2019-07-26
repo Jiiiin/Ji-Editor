@@ -28,14 +28,15 @@ export class EditorComponent implements OnInit {
   ngOnInit() {
     const onLoadMonacoScript = () => {
       (<any>window).require.config({paths : {'vs' : 'assets/monaco/vs'}});
-      (<any>window)
-          .require([ 'vs/editor/editor.main' ], () => { this._initMonaco(); });
+      (<any>window).require([ 'vs/editor/editor.main' ], () => { this._initMonaco(); });
     };
-    const loaderScript = document.createElement('script');
-    loaderScript.type = 'text/javascript';
-    loaderScript.src = 'assets/monaco/vs/loader.js';
-    loaderScript.addEventListener('load', onLoadMonacoScript);
-    document.body.appendChild(loaderScript);
+    if (!(<any>window).require) {
+        const loaderScript = document.createElement('script');
+        loaderScript.type = 'text/javascript';
+        loaderScript.src = 'assets/monaco/vs/loader.js';
+        loaderScript.addEventListener('load', onLoadMonacoScript);
+        document.body.appendChild(loaderScript);
+    }
   }
 
   private _initMonaco(): void {
@@ -43,7 +44,7 @@ export class EditorComponent implements OnInit {
       value: this._code,
       language: 'javascript',
       automaticLayout: true
-    }
+    };
     const options = Object.assign(defaultOptions, this.options);
     this.editor = monaco.editor.create(this._editorContainer.nativeElement, options);
     this._renderer.setStyle(this._editorContainer.nativeElement, 'width', this.width);
