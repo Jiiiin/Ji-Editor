@@ -1,4 +1,4 @@
-import { Component, forwardRef, AfterViewInit, ViewChild, NgZone, ElementRef, Input, Output, EventEmitter, Renderer2 } from '@angular/core';
+import { Component, forwardRef, AfterViewInit, ViewChild, NgZone, ElementRef, Input, Output, EventEmitter, Renderer2, OnDestroy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 declare const monaco;
 let loadedMonaco = false;
@@ -24,7 +24,7 @@ providers: [{
   multi: true
 }]
 })
-export class EditorComponent implements AfterViewInit, ControlValueAccessor{
+export class EditorComponent implements AfterViewInit, ControlValueAccessor, OnDestroy{
   @ViewChild('editorContainer', {static: true}) _editorContainer: ElementRef;
   @Input() public height: string;
   @Input() public width: string;
@@ -48,7 +48,6 @@ export class EditorComponent implements AfterViewInit, ControlValueAccessor{
     } else {
       loadedMonaco = true;
       loadPromise = new Promise<void>((resolve: any) => {
-        const baseUrl = '/assets';
         if (typeof ((<any>window).monaco) === 'object') {
           resolve();
           return;
@@ -64,7 +63,7 @@ export class EditorComponent implements AfterViewInit, ControlValueAccessor{
         if (!(<any>window).require) {
           const loaderScript: HTMLScriptElement = document.createElement('script');
           loaderScript.type = 'text/javascript';
-          loaderScript.src = `${baseUrl}/monaco/vs/loader.js`;
+          loaderScript.src = `/assets/monaco/vs/loader.js`;
           loaderScript.addEventListener('load', onGotAmdLoader);
           document.body.appendChild(loaderScript);
         } else {
@@ -111,6 +110,12 @@ export class EditorComponent implements AfterViewInit, ControlValueAccessor{
     this.editor.onDidBlurEditorWidget(() => {
       this.onTouched();
     });
+  }
+  ngOnDestroy(): void {
+    if (this.editor) {
+      this.editor.dispose();
+      this.editor = undefined;
+    }
   }
 
 }
