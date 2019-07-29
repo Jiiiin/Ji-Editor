@@ -1,11 +1,30 @@
-import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter, Renderer2 } from '@angular/core';
+import { Component, forwardRef, AfterViewInit, ViewChild, NgZone, ElementRef, Input, Output, EventEmitter, Renderer2 } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 declare const monaco;
+let loadedMonaco = false;
+let loadPromise: Promise<void>;
 
 @Component({
   selector: 'app-editor',
-  template: `<div #editorContainer></div>`
+  template: `<div #editorContainer class="editor-container"></div>`,
+  styles: [`
+  :host {
+    display: block;
+    height: 200px;
+  }
+
+  .editor-container {
+    width: 100%;
+    height: 98%;
+  }
+`],
+providers: [{
+  provide: NG_VALUE_ACCESSOR,
+  useExisting: forwardRef(() => EditorComponent),
+  multi: true
+}]
 })
-export class EditorComponent implements OnInit {
+export class EditorComponent implements AfterViewInit, ControlValueAccessor{
   @ViewChild('editorContainer', {static: true}) _editorContainer: ElementRef;
   @Input() public height: string;
   @Input() public width: string;
@@ -13,30 +32,63 @@ export class EditorComponent implements OnInit {
   @Input() get code(): string {
     return this._code;
   }
-  set code(value) {
-    this._code = value ? value : '';
-    if (this.editor) {
-      this.editor.setValue(this._code);
-    }
-  }
   @Output() public codeChange = new EventEmitter<string>();
   private _code = '';
   public editor: any;
+  propagateChange = (_: any) => {};
+  onTouched = () => {};
 
-  constructor(private _renderer: Renderer2) { }
+  constructor(private _renderer: Renderer2, private zone: NgZone) { }
 
-  ngOnInit() {
-    const onLoadMonacoScript = () => {
-      (<any>window).require.config({paths : {'vs' : 'assets/monaco/vs'}});
-      (<any>window).require([ 'vs/editor/editor.main' ], () => { this._initMonaco(); });
-    };
-    if (!(<any>window).require) {
-        const loaderScript = document.createElement('script');
-        loaderScript.type = 'text/javascript';
-        loaderScript.src = 'assets/monaco/vs/loader.js';
-        loaderScript.addEventListener('load', onLoadMonacoScript);
-        document.body.appendChild(loaderScript);
+  ngAfterViewInit(): void {
+    if (loadedMonaco) {
+      loadPromise.then(() => {
+        this._initMonaco();
+      });
+    } else {
+      loadedMonaco = true;
+      loadPromise = new Promise<void>((resolve: any) => {
+        const baseUrl = '/assets';
+        if (typeof ((<any>window).monaco) === 'object') {
+          resolve();
+          return;
+        }
+        const onGotAmdLoader: any = () => {
+          (<any>window).require.config({paths : {'vs' : 'assets/monaco/vs'}});
+          (<any>window).require(['vs/editor/editor.main'], () => {
+            this._initMonaco();
+            resolve();
+          });
+        };
+
+        if (!(<any>window).require) {
+          const loaderScript: HTMLScriptElement = document.createElement('script');
+          loaderScript.type = 'text/javascript';
+          loaderScript.src = `${baseUrl}/monaco/vs/loader.js`;
+          loaderScript.addEventListener('load', onGotAmdLoader);
+          document.body.appendChild(loaderScript);
+        } else {
+          onGotAmdLoader();
+        }
+      });
     }
+  }
+
+  writeValue(value: any): void {
+    this._code = value || '';
+    setTimeout(() => {
+      if (this.editor && !this.options.model) {
+        this.editor.setValue(this._code);
+      }
+    });
+  }
+
+  registerOnChange(fn: any): void {
+    this.propagateChange = fn;
+  }
+
+  registerOnTouched(fn: any): void {
+    this.onTouched = fn;
   }
 
   private _initMonaco(): void {
@@ -52,7 +104,12 @@ export class EditorComponent implements OnInit {
 
     this.editor.onDidChangeModelContent((e: any) => {
       const value = this.editor.getValue();
+      this.propagateChange(value);
+      this.zone.run(() => this._code = value);
       this.codeChange.emit(value);
+    });
+    this.editor.onDidBlurEditorWidget(() => {
+      this.onTouched();
     });
   }
 
