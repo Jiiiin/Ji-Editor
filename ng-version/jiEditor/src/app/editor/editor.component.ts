@@ -29,9 +29,6 @@ export class EditorComponent implements AfterViewInit, ControlValueAccessor, OnD
   @Input() public height: string;
   @Input() public width: string;
   @Input() public options: any = {};
-  @Input() get code(): string {
-    return this._code;
-  }
   @Output() public codeChange = new EventEmitter<string>();
   private _code = '';
   public editor: any;

@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
     BrowserModule, FormsModule, MonacoEditorModule.forRoot()
   ],
   providers: [],
+  entryComponents: [EditorComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
