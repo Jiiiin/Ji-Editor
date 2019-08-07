@@ -1,1 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
+.myInlineDecoration {
+	color: red !important;
+	cursor: pointer;
+	text-decoration: underline;
+	font-weight: bold;
+	font-style: oblique;
+}

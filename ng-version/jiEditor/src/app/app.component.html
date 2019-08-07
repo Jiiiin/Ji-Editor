@@ -1,5 +1,2 @@
-<app-editor [options]="editorOptions1" [(ngModel)]="code1"></app-editor>
-<app-editor [options]="editorOptions2" [(ngModel)]="code2"></app-editor>
-<div #editorContainer1></div>
-<div #editorContainer2></div>
-<button (click)="switchCode()">SwitchCode</button>
+<app-editor #editor [options]="editorOptions1" [(ngModel)]="code1"></app-editor>
+<button (click)="setPosition()">SwitchCode</button>

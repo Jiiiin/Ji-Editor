@@ -15,7 +15,7 @@ let loadPromise: Promise<void>;
 
   .editor-container {
     width: 100%;
-    height: 98%;
+    height: 100%;
   }
 `],
 providers: [{
@@ -30,12 +30,13 @@ export class EditorComponent implements AfterViewInit, ControlValueAccessor, OnD
   @Input() public width: string;
   @Input() public options: any = {};
   @Output() public codeChange = new EventEmitter<string>();
+  @Output() public ready = new EventEmitter<void>();
   private _code = '';
   public editor: any;
   propagateChange = (_: any) => {};
   onTouched = () => {};
 
-  constructor(private _renderer: Renderer2, private zone: NgZone) { }
+  constructor(private _renderer: Renderer2, private _zone: NgZone) { }
 
   ngAfterViewInit(): void {
     if (loadedMonaco) {
@@ -91,17 +92,17 @@ export class EditorComponent implements AfterViewInit, ControlValueAccessor, OnD
     const defaultOptions = {
       value: this._code,
       language: 'javascript',
-      automaticLayout: true
+      automaticLayout: true,
+      theme: 'vs-dark'
     };
     const options = Object.assign(defaultOptions, this.options);
-    this.editor = monaco.editor.create(this._editorContainer.nativeElement, options);
     this._renderer.setStyle(this._editorContainer.nativeElement, 'width', this.width);
     this._renderer.setStyle(this._editorContainer.nativeElement, 'height', this.height);
-
+    this._zone.runOutsideAngular(() => this.editor = monaco.editor.create(this._editorContainer.nativeElement, options));
     this.editor.onDidChangeModelContent((e: any) => {
       const value = this.editor.getValue();
       this.propagateChange(value);
-      this.zone.run(() => this._code = value);
+      this._zone.run(() => this._code = value);
       this.codeChange.emit(value);
     });
     this.editor.onDidBlurEditorWidget(() => {
